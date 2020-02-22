@@ -9,7 +9,7 @@ const routes: Routes = [
     component: OffersPage
   },
   {
-    path: 'new-offer',
+    path: 'new',
     loadChildren: () => import('./new-offer/new-offer.module').then( m => m.NewOfferPageModule)
   },
   {
