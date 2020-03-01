@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Place } from './place.model';
 import { BehaviorSubject } from 'rxjs';
 import { take, map, tap, delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +42,10 @@ export class PlacesService {
     )
   ]);
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private httpClient: HttpClient
+  ) {}
 
   getPlaces() {
     // return [...this._places];
@@ -64,26 +68,39 @@ export class PlacesService {
     dateFrom: Date,
     dateTo: Date
   ) {
-    const random_image_link =
+    const randomImageLink =
       'https://randomhall.co.uk/wp-content/uploads/2018/06/coutry-house-hotels-in-west-sussex-slifold-l.jpg';
     const newPlace = new Place(
       Math.random().toString(),
       title,
       description,
-      random_image_link,
+      randomImageLink,
       price,
       dateFrom,
       dateTo,
       this.authService.userId
     );
+    return this.httpClient
+      .post(
+        'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json',
+        {
+          ...newPlace,
+          id: null
+        }
+      )
+      .pipe(
+        tap(resData => {
+          console.log(resData);
+        })
+      );
     // this._places.push(newPlace);
-    return this.getPlaces().pipe(
-      take(1),
-      delay(1000),
-      tap(places => {
-        this._places.next(places.concat(newPlace));
-      })
-    );
+    // return this.getPlaces().pipe(
+    //   take(1),
+    //   delay(1000),
+    //   tap(places => {
+    //     this._places.next(places.concat(newPlace));
+    //   })
+    // );
   }
 
   updatePlace(placeId: string, title: string, description: string) {
