@@ -1,3 +1,4 @@
+import { AuthService } from './../../../auth/auth.service';
 import { BookingService } from './../../../bookings/booking.service';
 import { CreateBookingComponent } from './../../../bookings/create-booking/create-booking.component';
 import { PlacesService } from './../../places.service';
@@ -20,6 +21,7 @@ import { Subscription } from 'rxjs';
 export class PlaceDetailPage implements OnInit, OnDestroy {
   place: Place;
   private placesSub: Subscription;
+  isBookable = false;
 
   constructor(
     private router: Router,
@@ -29,7 +31,8 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
     private bookingService: BookingService,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -41,8 +44,9 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       // this.place = this.placesService.getPlace(paramMap.get('placeId'));
       this.placesSub = this.placesService
         .getPlace(paramMap.get('placeId'))
-        .subscribe(place => {
+        .subscribe(place => {          
           this.place = place;
+          this.isBookable = place.userId !== this.authService.userId;
         });
     });
   }
