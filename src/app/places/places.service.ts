@@ -2,7 +2,7 @@ import { AuthService } from './../auth/auth.service';
 import { Injectable } from '@angular/core';
 import { Place } from './place.model';
 import { BehaviorSubject } from 'rxjs';
-import { take, map, tap, delay } from 'rxjs/operators';
+import { take, map, tap, delay, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
@@ -70,6 +70,7 @@ export class PlacesService {
   ) {
     const randomImageLink =
       'https://randomhall.co.uk/wp-content/uploads/2018/06/coutry-house-hotels-in-west-sussex-slifold-l.jpg';
+    let generatedId: string;
     const newPlace = new Place(
       Math.random().toString(),
       title,
@@ -81,7 +82,7 @@ export class PlacesService {
       this.authService.userId
     );
     return this.httpClient
-      .post(
+      .post<{ name: string }>(
         'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json',
         {
           ...newPlace,
@@ -89,8 +90,17 @@ export class PlacesService {
         }
       )
       .pipe(
-        tap(resData => {
-          console.log(resData);
+        // tap(resData => {
+        //   console.log(resData);
+        // })
+        switchMap(resData => {
+          generatedId = resData.name;
+          return this.getPlaces();
+        }),
+        take(1),
+        tap(places => {
+          newPlace.id = generatedId;
+          this._places.next(places.concat(newPlace));
         })
       );
     // this._places.push(newPlace);
