@@ -5,42 +5,54 @@ import { BehaviorSubject } from 'rxjs';
 import { take, map, tap, delay, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
+// [
+//   new Place(
+//     'p1',
+//     'Manhattan Mansion',
+//     'In the heart of New York City.',
+//     'https://imgs.6sqft.com/wp-content/uploads/2014/06/21042533/Carnegie-Mansion-nyc.jpg',
+//     149.99,
+//     new Date('2020-03-01'),
+//     new Date('2020-12-31'),
+//     'user01'
+//   ),
+//   new Place(
+//     'p2',
+//     "L'Amour Toujours",
+//     'A romantic place in Paris!',
+//     'https://tophotel.news/wp-content/uploads/2018/06/25hours-francess-1024x512.jpg',
+//     189.99,
+//     new Date('2020-03-01'),
+//     new Date('2020-12-31'),
+//     'user02'
+//   ),
+//   new Place(
+//     'p3',
+//     'The Foggy Palace',
+//     'Not your average city trip!',
+//     'https://i.pinimg.com/originals/65/8f/77/658f77b9b527f89922ba996560a3e2b0.jpg',
+//     99.99,
+//     new Date('2020-03-01'),
+//     new Date('2020-12-31'),
+//     'user03'
+//   )
+// ]
+
+interface PlaceData {
+  availableFrom: string;
+  availableTo: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  title: string;
+  userId: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class PlacesService {
-  private _places = new BehaviorSubject<Place[]>([
-    new Place(
-      'p1',
-      'Manhattan Mansion',
-      'In the heart of New York City.',
-      'https://imgs.6sqft.com/wp-content/uploads/2014/06/21042533/Carnegie-Mansion-nyc.jpg',
-      149.99,
-      new Date('2020-03-01'),
-      new Date('2020-12-31'),
-      'user01'
-    ),
-    new Place(
-      'p2',
-      "L'Amour Toujours",
-      'A romantic place in Paris!',
-      'https://tophotel.news/wp-content/uploads/2018/06/25hours-francess-1024x512.jpg',
-      189.99,
-      new Date('2020-03-01'),
-      new Date('2020-12-31'),
-      'user02'
-    ),
-    new Place(
-      'p3',
-      'The Foggy Palace',
-      'Not your average city trip!',
-      'https://i.pinimg.com/originals/65/8f/77/658f77b9b527f89922ba996560a3e2b0.jpg',
-      99.99,
-      new Date('2020-03-01'),
-      new Date('2020-12-31'),
-      'user03'
-    )
-  ]);
+  private _places = new BehaviorSubject<Place[]>([]);
 
   constructor(
     private authService: AuthService,
@@ -50,6 +62,40 @@ export class PlacesService {
   getPlaces() {
     // return [...this._places];
     return this._places.asObservable();
+  }
+
+  fetchPlaces() {
+    return this.httpClient
+      .get<{ [key: string]: PlaceData }>(
+        'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json'
+      )
+      .pipe(
+        map(resData => {
+          const places = [];
+          for (const key in resData) {
+            if (resData.hasOwnProperty(key)) {
+              places.push(
+                new Place(
+                  key,
+                  resData[key].title,
+                  resData[key].description,
+                  resData[key].imageUrl,
+                  resData[key].price,
+                  new Date(resData[key].availableFrom),
+                  new Date(resData[key].availableTo),
+                  resData[key].userId
+                )
+              );
+            }
+          }
+          return places;
+          // testing spinner when no offers in array
+          // return [];
+        }),
+        tap(places => {
+          this._places.next(places);
+        })
+      );
   }
 
   getPlace(id: string) {
