@@ -15,7 +15,7 @@
 </ion-header>
 
 <ion-content>
-  <div *ngIf="isLoading">
+  <div *ngIf="isLoading" class="ion-text-center">
     <ion-spinner color="primary"></ion-spinner>
   </div>
   <form [formGroup]="form" *ngIf="!isLoading">
