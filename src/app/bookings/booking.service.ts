@@ -1,8 +1,9 @@
-import { take, tap, delay } from 'rxjs/operators';
+import { take, tap, delay, switchMap } from 'rxjs/operators';
 import { AuthService } from './../auth/auth.service';
 import { Booking } from './booking.model';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 export class BookingService {
   private _bookings = new BehaviorSubject<Booking[]>([]);
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private http: HttpClient) {}
 
   getBookings() {
     return this._bookings.asObservable();
@@ -26,6 +27,7 @@ export class BookingService {
     dateFrom: Date,
     dateTo: Date
   ) {
+    let generatedId: string;
     const id = Math.random().toString();
     const newBooking = new Booking(
       id,
@@ -39,13 +41,22 @@ export class BookingService {
       dateFrom,
       dateTo
     );
-    return this.getBookings().pipe(
-      take(1),
-      delay(1000),
-      tap(bookings => {
-        this._bookings.next(bookings.concat(newBooking));
-      })
-    );
+    return this.http
+      .post<{ name: string }>(
+        'https://ionic-angular-udemy-by-max.firebaseio.com/bookings.json',
+        { ...newBooking, id: null }
+      )
+      .pipe(
+        switchMap(resData => {
+          generatedId = resData.name;
+          return this.getBookings();
+        }),
+        take(1),
+        tap(bookings => {
+          newBooking.id = generatedId;
+          this._bookings.next(bookings.concat(newBooking));
+        })
+      );
   }
 
   cancelBooking(bookingId: string) {
