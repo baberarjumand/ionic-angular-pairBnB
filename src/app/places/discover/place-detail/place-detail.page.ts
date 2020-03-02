@@ -9,7 +9,8 @@ import {
   NavController,
   ModalController,
   ActionSheetController,
-  LoadingController
+  LoadingController,
+  AlertController
 } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
@@ -22,6 +23,7 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
   place: Place;
   private placesSub: Subscription;
   isBookable = false;
+  isLoading = false;
 
   constructor(
     private router: Router,
@@ -32,7 +34,8 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private actionSheetCtrl: ActionSheetController,
     private bookingService: BookingService,
     private loadingCtrl: LoadingController,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {
@@ -41,13 +44,35 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         this.navController.navigateBack('/places/tabs/discover');
         return;
       }
+      this.isLoading = true;
       // this.place = this.placesService.getPlace(paramMap.get('placeId'));
       this.placesSub = this.placesService
         .getPlace(paramMap.get('placeId'))
-        .subscribe(place => {
-          this.place = place;
-          this.isBookable = place.userId !== this.authService.userId;
-        });
+        .subscribe(
+          place => {
+            this.place = place;
+            this.isBookable = place.userId !== this.authService.userId;
+            this.isLoading = false;
+          },
+          error => {
+            this.alertCtrl
+              .create({
+                header: 'An error occurred!',
+                message: 'Place could not be loaded. Please try again later.',
+                buttons: [
+                  {
+                    text: 'Okay',
+                    handler: () => {
+                      this.router.navigate(['/places/tabs/discover']);
+                    }
+                  }
+                ]
+              })
+              .then(alertEl => {
+                alertEl.present();
+              });
+          }
+        );
     });
   }
 
