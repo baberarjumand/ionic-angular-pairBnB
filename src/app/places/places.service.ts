@@ -99,12 +99,35 @@ export class PlacesService {
   }
 
   getPlace(id: string) {
-    return this.getPlaces().pipe(
-      take(1),
-      map(places => {
-        return { ...places.find(p => p.id === id) };
-      })
-    );
+    // fetch locally
+    // return this.getPlaces().pipe(
+    //   take(1),
+    //   map(places => {
+    //     return { ...places.find(p => p.id === id) };
+    //   })
+    // );
+    // fetch from server
+    return this.httpClient
+      .get<PlaceData>(
+        `https://ionic-angular-udemy-by-max.firebaseio.com/offered-places/${id}.json`
+      )
+      .pipe(
+        // tap(resData => {
+        //   console.log(resData);
+        // }),
+        map(placeData => {
+          return new Place(
+            id,
+            placeData.title,
+            placeData.description,
+            placeData.imageUrl,
+            placeData.price,
+            new Date(placeData.availableFrom),
+            new Date(placeData.availableTo),
+            placeData.userId
+          );
+        })
+      );
   }
 
   addPlace(
