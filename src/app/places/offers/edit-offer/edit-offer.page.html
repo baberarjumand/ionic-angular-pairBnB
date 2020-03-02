@@ -4,7 +4,7 @@
       <ion-back-button [defaultHref]="'/places/tabs/offers/' + placeId"></ion-back-button>
     </ion-buttons>
     <ion-title>
-      Edit Offer: {{ place.title }}
+      Edit Offer: {{ isLoading? 'Loading...' : place.title }}
     </ion-title>
     <ion-buttons slot="primary">
       <ion-button (click)="onUpdateOffer()" [disabled]="!form?.valid">
