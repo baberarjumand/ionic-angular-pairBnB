@@ -1,4 +1,4 @@
-<div class="picker">  
+<div class="picker">
   <ion-img
     role="button"
     (click)="onPickImage()"
@@ -16,3 +16,9 @@
     <ion-label>Take Picture</ion-label>
   </ion-button>
 </div>
+<input
+  type="file"
+  *ngIf="useFilePicker"
+  #filePicker
+  (change)="onFileChosen($event)"
+/>
