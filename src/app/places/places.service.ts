@@ -134,13 +134,24 @@ export class PlacesService {
       );
   }
 
+  uploadImage(image: File) {
+    const uploadData = new FormData();
+    uploadData.append('image', image);
+
+    return this.httpClient.post<{ imageUrl: string; imagePath: string }>(
+      'https://us-central1-ionic-angular-udemy-by-max.cloudfunctions.net/storeImage',
+      uploadData
+    );
+  }
+
   addPlace(
     title: string,
     description: string,
     price: number,
     dateFrom: Date,
     dateTo: Date,
-    location: PlaceLocation
+    location: PlaceLocation,
+    imageUrl: string
   ) {
     const randomImageLink =
       'https://randomhall.co.uk/wp-content/uploads/2018/06/coutry-house-hotels-in-west-sussex-slifold-l.jpg';
@@ -149,7 +160,7 @@ export class PlacesService {
       Math.random().toString(),
       title,
       description,
-      randomImageLink,
+      imageUrl,
       price,
       dateFrom,
       dateTo,
