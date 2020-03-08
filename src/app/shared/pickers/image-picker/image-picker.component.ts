@@ -44,7 +44,7 @@ export class ImagePickerComponent implements OnInit {
   }
 
   onPickImage() {
-    if (!Capacitor.isPluginAvailable('Camera') || this.useFilePicker) {
+    if (!Capacitor.isPluginAvailable('Camera')) {
       this.filePickerRef.nativeElement.click();
       return;
     }
@@ -65,6 +65,9 @@ export class ImagePickerComponent implements OnInit {
       })
       .catch(error => {
         console.log(error);
+        if (this.useFilePicker) {
+          this.filePickerRef.nativeElement.click();
+        }
         return false;
       });
   }
