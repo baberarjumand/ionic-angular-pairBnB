@@ -18,6 +18,7 @@
 </div>
 <input
   type="file"
+  accept="image/jpeg"
   *ngIf="useFilePicker"
   #filePicker
   (change)="onFileChosen($event)"

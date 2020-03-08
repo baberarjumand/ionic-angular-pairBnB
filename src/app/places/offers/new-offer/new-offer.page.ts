@@ -68,11 +68,13 @@ export class NewOfferPage implements OnInit {
   }
 
   onCreateOffer() {
-    if (!this.form.valid) {
+    if (!this.form.valid || !this.form.get('image').value) {
       return;
     }
     // console.log('Creating offered place...');
     // console.log(this.form);
+    console.log(this.form.value);
+
     this.loadingCtrl
       .create({
         message: 'Creating place...'
