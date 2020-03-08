@@ -78,4 +78,6 @@ export class NewOfferPage implements OnInit {
     // tslint:disable-next-line: object-literal-shorthand
     this.form.patchValue({ location: location });
   }
+
+  onImagePicked(imageData: string) {}
 }
