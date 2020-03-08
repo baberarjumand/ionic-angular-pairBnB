@@ -11,7 +11,8 @@ import {
   Output,
   EventEmitter,
   ViewChild,
-  ElementRef
+  ElementRef,
+  Input
 } from '@angular/core';
 
 @Component({
@@ -26,6 +27,7 @@ export class ImagePickerComponent implements OnInit {
   @ViewChild('filePicker', { static: false }) filePickerRef: ElementRef<
     HTMLInputElement
   >;
+  @Input() showPreview = false;
 
   constructor(private platform: Platform) {}
 
