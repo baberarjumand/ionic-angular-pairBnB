@@ -1,3 +1,6 @@
+import { map } from 'rxjs/operators';
+import { User } from './user.model';
+import { BehaviorSubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
@@ -15,19 +18,36 @@ export interface AuthResponseData {
   providedIn: 'root'
 })
 export class AuthService {
-  private _userIsAuthenticated = false;
+  // private _userIsAuthenticated = false;
   // private _userId = 'user01';
   // private _userId = 'user02';
-  private _userId = null;
+  private _user = new BehaviorSubject<User>(null);
 
   constructor(private http: HttpClient) {}
 
-  getUserIsAuthenticated() {
-    return this._userIsAuthenticated;
+  get userIsAuthenticated() {
+    // return this._userIsAuthenticated;
+    return this._user.asObservable().pipe(
+      map(user => {
+        if (user) {
+          return !!user.token;
+        } else {
+          return false;
+        }
+      })
+    );
   }
 
   get userId() {
-    return this._userId;
+    return this._user.asObservable().pipe(
+      map(user => {
+        if (user) {
+          return user.id;
+        } else {
+          return null;
+        }
+      })
+    );
   }
 
   login(email: string, password: string) {
@@ -44,7 +64,8 @@ export class AuthService {
   }
 
   logout() {
-    this._userIsAuthenticated = false;
+    // this._userIsAuthenticated = false;
+    this._user.next(null);
   }
 
   signUp(email: string, password: string) {
