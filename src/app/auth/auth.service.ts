@@ -1,4 +1,4 @@
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { User } from './user.model';
 import { BehaviorSubject } from 'rxjs';
 import { Injectable } from '@angular/core';
@@ -53,14 +53,16 @@ export class AuthService {
   login(email: string, password: string) {
     // this._userIsAuthenticated = true;
     const firebaseApiKey = environment.firebaseWebApiKey;
-    return this.http.post<AuthResponseData>(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`,
-      {
-        email,
-        password,
-        returnSecureToken: true
-      }
-    );
+    return this.http
+      .post<AuthResponseData>(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`,
+        {
+          email,
+          password,
+          returnSecureToken: true
+        }
+      )
+      .pipe(tap(this.setUserData.bind(this)));
   }
 
   logout() {
@@ -70,13 +72,31 @@ export class AuthService {
 
   signUp(email: string, password: string) {
     const firebaseApiKey = environment.firebaseWebApiKey;
-    return this.http.post<AuthResponseData>(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${firebaseApiKey}`,
-      {
-        email,
-        password,
-        returnSecureToken: true
-      }
+    return this.http
+      .post<AuthResponseData>(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${firebaseApiKey}`,
+        {
+          email,
+          password,
+          returnSecureToken: true
+        }
+      )
+      .pipe(tap(this.setUserData.bind(this)));
+  }
+
+  private setUserData(userData: AuthResponseData) {
+    // generate timestamp that is an hour after this request
+    // this const is in milliseconds
+    const expirationTime = new Date(
+      new Date().getTime() + +userData.expiresIn * 1000
+    );
+    this._user.next(
+      new User(
+        userData.localId,
+        userData.email,
+        userData.idToken,
+        expirationTime
+      )
     );
   }
 }
