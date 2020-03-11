@@ -40,35 +40,41 @@ export class BookingService {
     dateTo: Date
   ) {
     let generatedId: string;
-    const id = Math.random().toString();
-    const newBooking = new Booking(
-      id,
-      placeId,
-      this.authService.userId,
-      placeTitle,
-      placeImageUrl,
-      firstName,
-      lastName,
-      guestNumber,
-      dateFrom,
-      dateTo
+    let newBooking: Booking;
+    this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('No user ID found!');
+        }
+        const id = Math.random().toString();
+        newBooking = new Booking(
+          id,
+          placeId,
+          userId,
+          placeTitle,
+          placeImageUrl,
+          firstName,
+          lastName,
+          guestNumber,
+          dateFrom,
+          dateTo
+        );
+        return this.http.post<{ name: string }>(
+          'https://ionic-angular-udemy-by-max.firebaseio.com/bookings.json',
+          { ...newBooking, id: null }
+        );
+      }),
+      switchMap(resData => {
+        generatedId = resData.name;
+        return this.getBookings();
+      }),
+      take(1),
+      tap(bookings => {
+        newBooking.id = generatedId;
+        this._bookings.next(bookings.concat(newBooking));
+      })
     );
-    return this.http
-      .post<{ name: string }>(
-        'https://ionic-angular-udemy-by-max.firebaseio.com/bookings.json',
-        { ...newBooking, id: null }
-      )
-      .pipe(
-        switchMap(resData => {
-          generatedId = resData.name;
-          return this.getBookings();
-        }),
-        take(1),
-        tap(bookings => {
-          newBooking.id = generatedId;
-          this._bookings.next(bookings.concat(newBooking));
-        })
-      );
   }
 
   cancelBooking(bookingId: string) {
