@@ -89,6 +89,6 @@ export class AuthPage implements OnInit {
         message,
         buttons: ['Okay']
       })
-      .then(alertEl => alertEl.present);
+      .then(alertEl => alertEl.present());
   }
 }
