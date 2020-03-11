@@ -41,7 +41,7 @@ export class BookingService {
   ) {
     let generatedId: string;
     let newBooking: Booking;
-    this.authService.userId.pipe(
+    return this.authService.userId.pipe(
       take(1),
       switchMap(userId => {
         if (!userId) {

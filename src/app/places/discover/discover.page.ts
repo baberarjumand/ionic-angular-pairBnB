@@ -1,3 +1,4 @@
+import { take } from 'rxjs/operators';
 import { AuthService } from './../../auth/auth.service';
 import { Place } from './../place.model';
 import { PlacesService } from './../places.service';
@@ -52,14 +53,16 @@ export class DiscoverPage implements OnInit, OnDestroy {
 
   onFilterUpdate(event: any) {
     // console.log(event.detail);
-    if (event.detail.value === 'all') {
-      this.relevantPlaces = this.loadedPlaces;
-      this.listedLoadedPlaces = this.relevantPlaces.slice(1);
-    } else if (event.detail.value === 'bookable') {
-      this.relevantPlaces = this.loadedPlaces.filter(
-        place => place.userId !== this.authService.userId
-      );
-      this.listedLoadedPlaces = this.relevantPlaces.slice(1);
-    }
+    this.authService.userId.pipe(take(1)).subscribe(userId => {
+      if (event.detail.value === 'all') {
+        this.relevantPlaces = this.loadedPlaces;
+        this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+      } else if (event.detail.value === 'bookable') {
+        this.relevantPlaces = this.loadedPlaces.filter(
+          place => place.userId !== userId
+        );
+        this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+      }
+    });
   }
 }

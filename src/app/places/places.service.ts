@@ -156,39 +156,42 @@ export class PlacesService {
     const randomImageLink =
       'https://randomhall.co.uk/wp-content/uploads/2018/06/coutry-house-hotels-in-west-sussex-slifold-l.jpg';
     let generatedId: string;
-    const newPlace = new Place(
-      Math.random().toString(),
-      title,
-      description,
-      imageUrl,
-      price,
-      dateFrom,
-      dateTo,
-      this.authService.userId,
-      location
-    );
-    return this.httpClient
-      .post<{ name: string }>(
-        'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json',
-        {
-          ...newPlace,
-          id: null
+    let newPlace: Place;
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('No user found!');
         }
-      )
-      .pipe(
-        // tap(resData => {
-        //   console.log(resData);
-        // })
-        switchMap(resData => {
-          generatedId = resData.name;
-          return this.getPlaces();
-        }),
-        take(1),
-        tap(places => {
-          newPlace.id = generatedId;
-          this._places.next(places.concat(newPlace));
-        })
-      );
+        newPlace = new Place(
+          Math.random().toString(),
+          title,
+          description,
+          imageUrl,
+          price,
+          dateFrom,
+          dateTo,
+          userId,
+          location
+        );
+        return this.httpClient.post<{ name: string }>(
+          'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json',
+          {
+            ...newPlace,
+            id: null
+          }
+        );
+      }),
+      switchMap(resData => {
+        generatedId = resData.name;
+        return this.getPlaces();
+      }),
+      take(1),
+      tap(places => {
+        newPlace.id = generatedId;
+        this._places.next(places.concat(newPlace));
+      })
+    );
     // this._places.push(newPlace);
     // return this.getPlaces().pipe(
     //   take(1),
