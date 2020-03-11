@@ -1,4 +1,5 @@
-import { AuthService } from './auth.service';
+import { Observable } from 'rxjs';
+import { AuthService, AuthResponseData } from './auth.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, AlertController } from '@ionic/angular';
@@ -24,7 +25,6 @@ export class AuthPage implements OnInit {
 
   authenticate(email: string, password: string) {
     this.isLoading = true;
-    this.authService.login();
     this.loadingCtrl
       .create({
         keyboardClose: true,
@@ -32,8 +32,14 @@ export class AuthPage implements OnInit {
       })
       .then(loadingEl => {
         loadingEl.present();
+        let authObs: Observable<AuthResponseData>;
+        if (this.isLogin) {
+          authObs = this.authService.login(email, password);
+        } else {
+          authObs = this.authService.signUp(email, password);
+        }
         // send a request to sign up servers
-        this.authService.signUp(email, password).subscribe(
+        authObs.subscribe(
           resData => {
             console.log(resData);
             this.isLoading = false;
@@ -47,6 +53,10 @@ export class AuthPage implements OnInit {
             let message = 'Could not sign you up, please try again.';
             if (errCode === 'EMAIL_EXISTS') {
               message = 'This email address is already registered!';
+            } else if (errCode === 'EMAIL_NOT_FOUND') {
+              message = 'Email address could not be found.';
+            } else if (errCode === 'INVALID_PASSWORD') {
+              message = 'Incorrect password entered!';
             }
             this.showAlert(message);
           }
