@@ -21,6 +21,7 @@ interface BookingData {
   providedIn: 'root'
 })
 export class BookingService {
+  // tslint:disable-next-line: variable-name
   private _bookings = new BehaviorSubject<Booking[]>([]);
 
   constructor(private authService: AuthService, private http: HttpClient) {}

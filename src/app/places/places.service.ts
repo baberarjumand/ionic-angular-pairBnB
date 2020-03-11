@@ -54,6 +54,7 @@ interface PlaceData {
   providedIn: 'root'
 })
 export class PlacesService {
+  // tslint:disable-next-line: variable-name
   private _places = new BehaviorSubject<Place[]>([]);
 
   constructor(

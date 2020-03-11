@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { Plugins } from '@capacitor/core';
 
 export interface AuthResponseData {
   idToken: string;
@@ -21,6 +22,7 @@ export class AuthService {
   // private _userIsAuthenticated = false;
   // private _userId = 'user01';
   // private _userId = 'user02';
+  // tslint:disable-next-line: variable-name
   private _user = new BehaviorSubject<User>(null);
 
   constructor(private http: HttpClient) {}
@@ -98,5 +100,26 @@ export class AuthService {
         expirationTime
       )
     );
+    this.storeAuthData(
+      userData.localId,
+      userData.idToken,
+      expirationTime.toISOString()
+    );
+  }
+
+  private storeAuthData(
+    userId: string,
+    token: string,
+    tokenExpirationDate: string
+  ) {
+    const data = JSON.stringify({
+      userId,
+      token,
+      tokenExpirationDate
+    });
+    Plugins.Storage.set({
+      key: 'authData',
+      value: data
+    });
   }
 }
