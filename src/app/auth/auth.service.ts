@@ -21,6 +21,7 @@ export interface AuthResponseData {
   providedIn: 'root'
 })
 export class AuthService {
+  // tslint:disable-next-line: variable-name
   private _user = new BehaviorSubject<User>(null);
 
   get userIsAuthenticated() {
@@ -104,6 +105,7 @@ export class AuthService {
 
   logout() {
     this._user.next(null);
+    Plugins.Storage.remove({ key: 'authData' });
   }
 
   private setUserData(userData: AuthResponseData) {

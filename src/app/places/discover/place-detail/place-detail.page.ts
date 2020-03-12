@@ -8,7 +8,7 @@ import {
   AlertController
 } from '@ionic/angular';
 import { Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 
 import { PlacesService } from '../../places.service';
 import { Place } from '../../place.model';
@@ -51,6 +51,7 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       let fetchedUserId: string;
       this.authService.userId
         .pipe(
+          take(1),
           switchMap(userId => {
             if (!userId) {
               throw new Error('Found no user!');

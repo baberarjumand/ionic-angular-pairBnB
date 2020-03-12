@@ -20,6 +20,7 @@ interface BookingData {
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
+  // tslint:disable-next-line: variable-name
   private _bookings = new BehaviorSubject<Booking[]>([]);
 
   get bookings() {
@@ -93,6 +94,7 @@ export class BookingService {
 
   fetchBookings() {
     return this.authService.userId.pipe(
+      take(1),
       switchMap(userId => {
         if (!userId) {
           throw new Error('User not found!');

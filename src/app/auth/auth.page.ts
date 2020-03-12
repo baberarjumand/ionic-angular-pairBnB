@@ -38,7 +38,7 @@ export class AuthPage implements OnInit {
         }
         authObs.subscribe(
           resData => {
-            console.log(resData);
+            // console.log(resData);
             this.isLoading = false;
             loadingEl.dismiss();
             this.router.navigateByUrl('/places/tabs/discover');
@@ -72,13 +72,14 @@ export class AuthPage implements OnInit {
     const password = form.value.password;
 
     this.authenticate(email, password);
+    form.reset();
   }
 
   private showAlert(message: string) {
     this.alertCtrl
       .create({
         header: 'Authentication failed',
-        message: message,
+        message,
         buttons: ['Okay']
       })
       .then(alertEl => alertEl.present());
