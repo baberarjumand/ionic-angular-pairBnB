@@ -1,10 +1,3 @@
-import { Platform } from '@ionic/angular';
-import {
-  Plugins,
-  Capacitor,
-  CameraSource,
-  CameraResultType
-} from '@capacitor/core';
 import {
   Component,
   OnInit,
@@ -14,6 +7,13 @@ import {
   ElementRef,
   Input
 } from '@angular/core';
+import {
+  Plugins,
+  Capacitor,
+  CameraSource,
+  CameraResultType
+} from '@capacitor/core';
+import { Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-image-picker',
@@ -21,27 +21,25 @@ import {
   styleUrls: ['./image-picker.component.scss']
 })
 export class ImagePickerComponent implements OnInit {
-  selectedImage: string;
+  @ViewChild('filePicker', { static: false }) filePickerRef: ElementRef<HTMLInputElement>;
   @Output() imagePick = new EventEmitter<string | File>();
-  useFilePicker = false;
-  @ViewChild('filePicker', { static: false }) filePickerRef: ElementRef<
-    HTMLInputElement
-  >;
   @Input() showPreview = false;
+  selectedImage: string;
+  usePicker = false;
 
   constructor(private platform: Platform) {}
 
   ngOnInit() {
-    console.log('Mobile: ', this.platform.is('mobile'));
-    console.log('Hybrid: ', this.platform.is('hybrid'));
-    console.log('iOS: ', this.platform.is('ios'));
-    console.log('Android: ', this.platform.is('android'));
-    console.log('Desktop: ', this.platform.is('desktop'));
+    console.log('Mobile:', this.platform.is('mobile'));
+    console.log('Hybrid:', this.platform.is('hybrid'));
+    console.log('iOS:', this.platform.is('ios'));
+    console.log('Android:', this.platform.is('android'));
+    console.log('Desktop:', this.platform.is('desktop'));
     if (
       (this.platform.is('mobile') && !this.platform.is('hybrid')) ||
       this.platform.is('desktop')
     ) {
-      this.useFilePicker = true;
+      this.usePicker = true;
     }
   }
 
@@ -54,20 +52,17 @@ export class ImagePickerComponent implements OnInit {
       quality: 50,
       source: CameraSource.Prompt,
       correctOrientation: true,
-      height: 320,
-      width: 200,
-      // resultType: CameraResultType.Base64
-      resultType: CameraResultType.DataUrl
+      // height: 320,
+      width: 300,
+      resultType: CameraResultType.Base64
     })
       .then(image => {
-        // this.selectedImage = image.base64String;
-        // this.imagePick.emit(image.base64String);
-        this.selectedImage = image.dataUrl;
-        this.imagePick.emit(image.dataUrl);
+        this.selectedImage = image.base64String;
+        this.imagePick.emit(image.base64String);
       })
       .catch(error => {
         console.log(error);
-        if (this.useFilePicker) {
+        if (this.usePicker) {
           this.filePickerRef.nativeElement.click();
         }
         return false;
@@ -75,10 +70,8 @@ export class ImagePickerComponent implements OnInit {
   }
 
   onFileChosen(event: Event) {
-    // console.log(event);
     const pickedFile = (event.target as HTMLInputElement).files[0];
     if (!pickedFile) {
-      // TODO show alert
       return;
     }
     const fr = new FileReader();

@@ -1,27 +1,18 @@
-import { AuthService } from './auth/auth.service';
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Platform } from '@ionic/angular';
-
-// these are cordova plugins
-// import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-// import { StatusBar } from '@ionic-native/status-bar/ngx';
-
-// import capacitor
 import { Plugins, Capacitor } from '@capacitor/core';
 
-import { Router } from '@angular/router';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss']
+  templateUrl: 'app.component.html'
 })
 export class AppComponent {
   constructor(
     private platform: Platform,
-    // private splashScreen: SplashScreen,
-    // private statusBar: StatusBar,
     private authService: AuthService,
     private router: Router
   ) {
@@ -29,10 +20,7 @@ export class AppComponent {
   }
 
   initializeApp() {
-    // console.log(this.platform.is('desktop'));
     this.platform.ready().then(() => {
-      // this.statusBar.styleDefault();
-      // this.splashScreen.hide();
       if (Capacitor.isPluginAvailable('SplashScreen')) {
         Plugins.SplashScreen.hide();
       }

@@ -1,11 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-menu-button menu="m1"></ion-menu-button>
+      <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>My Offers</ion-title>
     <ion-buttons slot="primary">
-      <ion-button routerLink="./new">
+      <ion-button routerLink="/places/tabs/offers/new">
         <ion-icon name="add" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -19,7 +19,7 @@
         <div *ngIf="isLoading" class="ion-text-center">
           <ion-spinner color="primary"></ion-spinner>
         </div>
-        <div class="ion-text-center" *ngIf="!isLoading && offers.length <=0">
+        <div class="ion-text-center" *ngIf="!isLoading && offers.length <= 0">
           <p>No offers found! Please create one first!</p>
           <ion-button color="primary" routerLink="/places/tabs/offers/new"
             >Offer New Place</ion-button
@@ -28,14 +28,12 @@
         <ion-list *ngIf="!isLoading && offers.length > 0">
           <ion-item-sliding *ngFor="let offer of offers" #slidingItem>
             <app-offer-item [offer]="offer"></app-offer-item>
-            <ion-item-options>
+            <ion-item-options side="end">
               <ion-item-option
                 color="secondary"
                 (click)="onEdit(offer.id, slidingItem)"
               >
                 <ion-icon name="create" slot="icon-only"></ion-icon>
-                <!-- <ion-icon name="create" slot="top"></ion-icon>
-                Edit -->
               </ion-item-option>
             </ion-item-options>
           </ion-item-sliding>

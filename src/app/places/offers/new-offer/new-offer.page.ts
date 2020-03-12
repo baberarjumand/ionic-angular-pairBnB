@@ -1,15 +1,16 @@
-import { switchMap } from 'rxjs/operators';
-import { PlaceLocation } from './../../location.model';
-import { PlacesService } from './../../places.service';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
 
+import { PlacesService } from '../../places.service';
+import { PlaceLocation } from '../../location.model';
+import { switchMap } from 'rxjs/operators';
+
 function base64toBlob(base64Data, contentType) {
   contentType = contentType || '';
   const sliceSize = 1024;
-  const byteCharacters = atob(base64Data);
+  const byteCharacters = window.atob(base64Data);
   const bytesLength = byteCharacters.length;
   const slicesCount = Math.ceil(bytesLength / sliceSize);
   const byteArrays = new Array(slicesCount);
@@ -68,14 +69,32 @@ export class NewOfferPage implements OnInit {
     });
   }
 
+  onLocationPicked(location: PlaceLocation) {
+    this.form.patchValue({ location: location });
+  }
+
+  onImagePicked(imageData: string | File) {
+    let imageFile;
+    if (typeof imageData === 'string') {
+      try {
+        imageFile = base64toBlob(
+          imageData.replace('data:image/jpeg;base64,', ''),
+          'image/jpeg'
+        );
+      } catch (error) {
+        console.log(error);
+        return;
+      }
+    } else {
+      imageFile = imageData;
+    }
+    this.form.patchValue({ image: imageFile });
+  }
+
   onCreateOffer() {
     if (!this.form.valid || !this.form.get('image').value) {
       return;
     }
-    // console.log('Creating offered place...');
-    // console.log(this.form);
-    console.log(this.form.value);
-
     this.loadingCtrl
       .create({
         message: 'Creating place...'
@@ -100,31 +119,8 @@ export class NewOfferPage implements OnInit {
           .subscribe(() => {
             loadingEl.dismiss();
             this.form.reset();
-            this.router.navigate(['/', 'places', 'tabs', 'offers']);
+            this.router.navigate(['/places/tabs/offers']);
           });
       });
-  }
-
-  onLocationPicked(location: PlaceLocation) {
-    // tslint:disable-next-line: object-literal-shorthand
-    this.form.patchValue({ location: location });
-  }
-
-  onImagePicked(imageData: string) {
-    let imageFile;
-    if (typeof imageData === 'string') {
-      try {
-        imageFile = base64toBlob(
-          imageData.replace('data:image/jpeg;base64,', ''),
-          'image/jpeg'
-        );
-      } catch (error) {
-        console.log(error);
-        return;
-      }
-    } else {
-      imageFile = imageData;
-    }
-    this.form.patchValue({ image: imageFile });
   }
 }

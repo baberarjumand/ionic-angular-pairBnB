@@ -1,7 +1,3 @@
-import { Plugins, Capacitor } from '@capacitor/core';
-import { PlaceLocation, Coordinates } from './../../../places/location.model';
-import { map, switchMap } from 'rxjs/operators';
-import { MapModalComponent } from './../../map-modal/map-modal.component';
 import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
 import {
   ModalController,
@@ -9,8 +5,13 @@ import {
   AlertController
 } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { Plugins, Capacitor } from '@capacitor/core';
+
+import { MapModalComponent } from '../../map-modal/map-modal.component';
+import { environment } from '../../../../environments/environment';
+import { PlaceLocation, Coordinates } from '../../../places/location.model';
 
 @Component({
   selector: 'app-location-picker',
@@ -18,10 +19,10 @@ import { of } from 'rxjs';
   styleUrls: ['./location-picker.component.scss']
 })
 export class LocationPickerComponent implements OnInit {
-  selectedLocationImage: string;
-  isLoading = false;
   @Output() locationPick = new EventEmitter<PlaceLocation>();
   @Input() showPreview = false;
+  selectedLocationImage: string;
+  isLoading = false;
 
   constructor(
     private modalCtrl: ModalController,
@@ -35,12 +36,12 @@ export class LocationPickerComponent implements OnInit {
   onPickLocation() {
     this.actionSheetCtrl
       .create({
-        header: 'Please choose',
+        header: 'Please Choose',
         buttons: [
           {
             text: 'Auto-Locate',
             handler: () => {
-              this.autoLocateUser();
+              this.locateUser();
             }
           },
           {
@@ -57,7 +58,7 @@ export class LocationPickerComponent implements OnInit {
       });
   }
 
-  private autoLocateUser() {
+  private locateUser() {
     if (!Capacitor.isPluginAvailable('Geolocation')) {
       this.showErrorAlert();
       return;
@@ -82,17 +83,15 @@ export class LocationPickerComponent implements OnInit {
     this.alertCtrl
       .create({
         header: 'Could not fetch location',
-        message: 'Please use the map to pick the location!'
+        message: 'Please use the map to pick a location!',
+        buttons: ['Okay']
       })
-      .then(alertEl => {
-        alertEl.present();
-      });
+      .then(alertEl => alertEl.present());
   }
 
   private openMap() {
     this.modalCtrl.create({ component: MapModalComponent }).then(modalEl => {
       modalEl.onDidDismiss().then(modalData => {
-        // console.log(modalData.data);
         if (!modalData.data) {
           return;
         }
@@ -108,8 +107,8 @@ export class LocationPickerComponent implements OnInit {
 
   private createPlace(lat: number, lng: number) {
     const pickedLocation: PlaceLocation = {
-      lat,
-      lng,
+      lat: lat,
+      lng: lng,
       address: null,
       staticMapImageUrl: null
     };
@@ -132,32 +131,25 @@ export class LocationPickerComponent implements OnInit {
   }
 
   private getAddress(lat: number, lng: number) {
-    // const myApiKey = 'AIzaSyADuyhM00QWeLQy5HP2ruqO3uyVe42x-Ww';
-    // my noob way
-    // const httpRequestUrlString =
-    //   'https://maps.googleapis.com/maps/api/geocode/json?latlng=' +
-    //   lat +
-    //   ',' +
-    //   lng +
-    //   '&key=' +
-    //   environment.googleMapsApiKey;
-    // new max way using back ticks
-    // tslint:disable-next-line: max-line-length
-    const httpRequestUrlString = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${environment.googleMapsApiKey}`;
-    return this.http.get(httpRequestUrlString).pipe(
-      map((geoData: any) => {
-        // console.log(geoData);
-        if (!geoData || !geoData.results || geoData.results.length === 0) {
-          return null;
-        }
-        return geoData.results[0].formatted_address;
-      })
-    );
+    return this.http
+      .get<any>(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${
+          environment.googleMapsAPIKey
+        }`
+      )
+      .pipe(
+        map(geoData => {
+          if (!geoData || !geoData.results || geoData.results.length === 0) {
+            return null;
+          }
+          return geoData.results[0].formatted_address;
+        })
+      );
   }
 
   private getMapImage(lat: number, lng: number, zoom: number) {
     return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=500x300&maptype=roadmap
     &markers=color:red%7Clabel:Place%7C${lat},${lng}
-    &key=${environment.googleMapsApiKey}`;
+    &key=${environment.googleMapsAPIKey}`;
   }
 }

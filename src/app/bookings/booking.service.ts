@@ -1,9 +1,10 @@
-import { take, tap, delay, switchMap, map } from 'rxjs/operators';
-import { AuthService } from './../auth/auth.service';
-import { Booking } from './booking.model';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
+import { take, tap, delay, switchMap, map } from 'rxjs/operators';
+
+import { Booking } from './booking.model';
+import { AuthService } from '../auth/auth.service';
 
 interface BookingData {
   bookedFrom: string;
@@ -12,28 +13,25 @@ interface BookingData {
   guestNumber: number;
   lastName: string;
   placeId: string;
-  placeImageUrl: string;
+  placeImage: string;
   placeTitle: string;
   userId: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class BookingService {
-  // tslint:disable-next-line: variable-name
   private _bookings = new BehaviorSubject<Booking[]>([]);
 
-  constructor(private authService: AuthService, private http: HttpClient) {}
-
-  getBookings() {
+  get bookings() {
     return this._bookings.asObservable();
   }
+
+  constructor(private authService: AuthService, private http: HttpClient) {}
 
   addBooking(
     placeId: string,
     placeTitle: string,
-    placeImageUrl: string,
+    placeImage: string,
     firstName: string,
     lastName: string,
     guestNumber: number,
@@ -46,15 +44,14 @@ export class BookingService {
       take(1),
       switchMap(userId => {
         if (!userId) {
-          throw new Error('No user ID found!');
+          throw new Error('No user id found!');
         }
-        const id = Math.random().toString();
         newBooking = new Booking(
-          id,
+          Math.random().toString(),
           placeId,
           userId,
           placeTitle,
-          placeImageUrl,
+          placeImage,
           firstName,
           lastName,
           guestNumber,
@@ -68,7 +65,7 @@ export class BookingService {
       }),
       switchMap(resData => {
         generatedId = resData.name;
-        return this.getBookings();
+        return this.bookings;
       }),
       take(1),
       tap(bookings => {
@@ -85,7 +82,7 @@ export class BookingService {
       )
       .pipe(
         switchMap(() => {
-          return this.getBookings();
+          return this.bookings;
         }),
         take(1),
         tap(bookings => {
@@ -114,7 +111,7 @@ export class BookingService {
                 bookingData[key].placeId,
                 bookingData[key].userId,
                 bookingData[key].placeTitle,
-                bookingData[key].placeImageUrl,
+                bookingData[key].placeImage,
                 bookingData[key].firstName,
                 bookingData[key].lastName,
                 bookingData[key].guestNumber,

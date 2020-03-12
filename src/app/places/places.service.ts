@@ -1,41 +1,42 @@
-import { PlaceLocation } from './location.model';
-import { AuthService } from './../auth/auth.service';
 import { Injectable } from '@angular/core';
-import { Place } from './place.model';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, of } from 'rxjs';
 import { take, map, tap, delay, switchMap } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+
+import { Place } from './place.model';
+import { AuthService } from '../auth/auth.service';
+import { PlaceLocation } from './location.model';
 
 // [
 //   new Place(
 //     'p1',
 //     'Manhattan Mansion',
 //     'In the heart of New York City.',
-//     'https://imgs.6sqft.com/wp-content/uploads/2014/06/21042533/Carnegie-Mansion-nyc.jpg',
+//     'https://lonelyplanetimages.imgix.net/mastheads/GettyImages-538096543_medium.jpg?sharp=10&vib=20&w=1200',
 //     149.99,
-//     new Date('2020-03-01'),
-//     new Date('2020-12-31'),
-//     'user01'
+//     new Date('2019-01-01'),
+//     new Date('2019-12-31'),
+//     'abc'
 //   ),
 //   new Place(
 //     'p2',
 //     "L'Amour Toujours",
 //     'A romantic place in Paris!',
-//     'https://tophotel.news/wp-content/uploads/2018/06/25hours-francess-1024x512.jpg',
+//     'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Paris_Night.jpg/1024px-Paris_Night.jpg',
 //     189.99,
-//     new Date('2020-03-01'),
-//     new Date('2020-12-31'),
-//     'user02'
+//     new Date('2019-01-01'),
+//     new Date('2019-12-31'),
+//     'abc'
 //   ),
 //   new Place(
 //     'p3',
 //     'The Foggy Palace',
 //     'Not your average city trip!',
-//     'https://i.pinimg.com/originals/65/8f/77/658f77b9b527f89922ba996560a3e2b0.jpg',
+//     'https://upload.wikimedia.org/wikipedia/commons/0/01/San_Francisco_with_two_bridges_and_the_fog.jpg',
 //     99.99,
-//     new Date('2020-03-01'),
-//     new Date('2020-12-31'),
-//     'user03'
+//     new Date('2019-01-01'),
+//     new Date('2019-12-31'),
+//     'abc'
 //   )
 // ]
 
@@ -54,21 +55,16 @@ interface PlaceData {
   providedIn: 'root'
 })
 export class PlacesService {
-  // tslint:disable-next-line: variable-name
   private _places = new BehaviorSubject<Place[]>([]);
 
-  constructor(
-    private authService: AuthService,
-    private httpClient: HttpClient
-  ) {}
-
-  getPlaces() {
-    // return [...this._places];
+  get places() {
     return this._places.asObservable();
   }
 
+  constructor(private authService: AuthService, private http: HttpClient) {}
+
   fetchPlaces() {
-    return this.httpClient
+    return this.http
       .get<{ [key: string]: PlaceData }>(
         'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json'
       )
@@ -93,7 +89,6 @@ export class PlacesService {
             }
           }
           return places;
-          // testing spinner when no offers in array
           // return [];
         }),
         tap(places => {
@@ -103,22 +98,11 @@ export class PlacesService {
   }
 
   getPlace(id: string) {
-    // fetch locally
-    // return this.getPlaces().pipe(
-    //   take(1),
-    //   map(places => {
-    //     return { ...places.find(p => p.id === id) };
-    //   })
-    // );
-    // fetch from server
-    return this.httpClient
+    return this.http
       .get<PlaceData>(
         `https://ionic-angular-udemy-by-max.firebaseio.com/offered-places/${id}.json`
       )
       .pipe(
-        // tap(resData => {
-        //   console.log(resData);
-        // }),
         map(placeData => {
           return new Place(
             id,
@@ -139,7 +123,7 @@ export class PlacesService {
     const uploadData = new FormData();
     uploadData.append('image', image);
 
-    return this.httpClient.post<{ imageUrl: string; imagePath: string }>(
+    return this.http.post<{ imageUrl: string; imagePath: string }>(
       'https://us-central1-ionic-angular-udemy-by-max.cloudfunctions.net/storeImage',
       uploadData
     );
@@ -154,8 +138,6 @@ export class PlacesService {
     location: PlaceLocation,
     imageUrl: string
   ) {
-    const randomImageLink =
-      'https://randomhall.co.uk/wp-content/uploads/2018/06/coutry-house-hotels-in-west-sussex-slifold-l.jpg';
     let generatedId: string;
     let newPlace: Place;
     return this.authService.userId.pipe(
@@ -175,7 +157,7 @@ export class PlacesService {
           userId,
           location
         );
-        return this.httpClient.post<{ name: string }>(
+        return this.http.post<{ name: string }>(
           'https://ionic-angular-udemy-by-max.firebaseio.com/offered-places.json',
           {
             ...newPlace,
@@ -185,7 +167,7 @@ export class PlacesService {
       }),
       switchMap(resData => {
         generatedId = resData.name;
-        return this.getPlaces();
+        return this.places;
       }),
       take(1),
       tap(places => {
@@ -193,8 +175,7 @@ export class PlacesService {
         this._places.next(places.concat(newPlace));
       })
     );
-    // this._places.push(newPlace);
-    // return this.getPlaces().pipe(
+    // return this.places.pipe(
     //   take(1),
     //   delay(1000),
     //   tap(places => {
@@ -205,7 +186,7 @@ export class PlacesService {
 
   updatePlace(placeId: string, title: string, description: string) {
     let updatedPlaces: Place[];
-    return this.getPlaces().pipe(
+    return this.places.pipe(
       take(1),
       switchMap(places => {
         if (!places || places.length <= 0) {
@@ -229,7 +210,7 @@ export class PlacesService {
           oldPlace.userId,
           oldPlace.location
         );
-        return this.httpClient.put(
+        return this.http.put(
           `https://ionic-angular-udemy-by-max.firebaseio.com/offered-places/${placeId}.json`,
           { ...updatedPlaces[updatedPlaceIndex], id: null }
         );

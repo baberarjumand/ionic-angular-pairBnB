@@ -1,7 +1,8 @@
-import { NgForm } from '@angular/forms';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
-import { Place } from 'src/app/places/place.model';
 import { ModalController } from '@ionic/angular';
+import { NgForm } from '@angular/forms';
+
+import { Place } from '../../places/place.model';
 
 @Component({
   selector: 'app-create-booking',
@@ -11,9 +12,9 @@ import { ModalController } from '@ionic/angular';
 export class CreateBookingComponent implements OnInit {
   @Input() selectedPlace: Place;
   @Input() selectedMode: 'select' | 'random';
+  @ViewChild('f', { static: false }) form: NgForm;
   startDate: string;
   endDate: string;
-  @ViewChild('f', { static: false }) form: NgForm;
 
   constructor(private modalCtrl: ModalController) {}
 
@@ -28,14 +29,19 @@ export class CreateBookingComponent implements OnInit {
               7 * 24 * 60 * 60 * 1000 -
               availableFrom.getTime())
       ).toISOString();
+
       this.endDate = new Date(
         new Date(this.startDate).getTime() +
           Math.random() *
             (new Date(this.startDate).getTime() +
-              6 * 24 * 60 * 60 -
+              6 * 24 * 60 * 60 * 1000 -
               new Date(this.startDate).getTime())
       ).toISOString();
     }
+  }
+
+  onCancel() {
+    this.modalCtrl.dismiss(null, 'cancel');
   }
 
   onBookPlace() {
@@ -43,7 +49,6 @@ export class CreateBookingComponent implements OnInit {
       return;
     }
 
-    // this.modalCtrl.dismiss({ message: 'A dummy message!'}, 'confirm');
     this.modalCtrl.dismiss(
       {
         bookingData: {
@@ -56,10 +61,6 @@ export class CreateBookingComponent implements OnInit {
       },
       'confirm'
     );
-  }
-
-  onCancel() {
-    this.modalCtrl.dismiss(null, 'cancel');
   }
 
   datesValid() {
