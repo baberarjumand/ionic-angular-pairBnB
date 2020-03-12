@@ -12,4 +12,12 @@ export class User {
     }
     return this._token;
   }
+
+  get tokenDuration() {
+    if (!this.token) {
+      return 0;
+    }
+    // return 2000; // simulating a 2 second duration for testing
+    return this.tokenExpirationDate.getTime() - new Date().getTime();
+  }
 }
