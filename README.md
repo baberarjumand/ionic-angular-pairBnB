@@ -12,7 +12,7 @@ Users are able to:
 The front-end was developed using Angular and Ionic frameworks.<br>
 Google's Firebase was leveraged to fulfill most back-end needs.<br>
 
-This application is ready to be deployed as a native mobile application on Android and iOS.<br>
+This application is ready to be deployed as a native mobile application on Android and iOS.<br><br>
 The web version of this app was deployed on Firebase, which can be accessed below:<br>
 https://ionic-angular-udemy-by-max.firebaseapp.com
 
