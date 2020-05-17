@@ -16,4 +16,4 @@ This application is ready to be deployed as a native mobile application on Andro
 The web version of this app was deployed on Firebase, which can be accessed below:<br>
 https://ionic-angular-udemy-by-max.firebaseapp.com
 
-This app was developed as part of the Udemy course on Ionic 5 by Maximillian Schwarzmuller.<br>
+This app was developed as part of the <a href='https://www.udemy.com/course/ionic-2-the-practical-guide-to-building-ios-android-apps/' target='_blank'>Udemy course on Ionic 5 by Maximillian Schwarzmuller</a>.<br>
